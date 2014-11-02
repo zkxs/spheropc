@@ -69,8 +69,8 @@ public class SpheroApp implements BluetoothDiscoveryListener
 		if ( !( t.equals(Controller.Type.STICK) || t.equals(Controller.Type.GAMEPAD) ) ) return false;
 		
 		// check if name is whitelisted
-		String name = c.getName().toLowerCase();
-		if (name.contains("xbox") || name.contains("gamepad f310")) return true;
+//		String name = c.getName().toLowerCase();
+//		if (name.contains("xbox") || name.contains("gamepad f310")) return true;
 		
 		// finally, examine components to see if it "looks" like an XBOX controller
 		Component[] comps = c.getComponents();
