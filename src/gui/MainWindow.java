@@ -8,8 +8,8 @@ import javax.swing.border.LineBorder;
 
 public class MainWindow extends JFrame
 {
-	/** WTF IS THIS SHIT??? */
-	private static final long serialVersionUID = 2740437090361841747L;	
+	/** Class version number */
+	//private static final long serialVersionUID = 0_0L; //TODO: Begin keeping track of this before release
 	
 	public static void main(String[] args)
 	{
