@@ -10,6 +10,7 @@ import s3.SpheroApp;
 import se.nicklasgavelin.sphero.Robot;
 import se.nicklasgavelin.sphero.command.CalibrateCommand;
 import se.nicklasgavelin.sphero.command.RollCommand;
+import se.nicklasgavelin.sphero.exception.RobotInitializeConnectionFailed;
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.Component.Identifier;
@@ -32,7 +33,10 @@ public class Sphero implements Comparable<Sphero>
 	 */
 	public void setController(Controller controller)
 	{
-		logger.info(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.getPortNumber());
+		if (controller != null)
+		{
+			logger.info(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.hashCode());
+		}
 		this.controller = controller;
 	}
 	
@@ -46,17 +50,32 @@ public class Sphero implements Comparable<Sphero>
 		return timerTask;
 	}
 	
-	public void startUpdating(Timer timer)
+	/**
+	 * 
+	 * @param timer
+	 * @return True if successful
+	 */
+	public boolean startUpdating(Timer timer)
 	{
 		this.timer = timer;
 		
 		Robot sphero = getRobot();
 		if (!sphero.isConnected())
 		{
-			sphero.connect(true);
+			try
+			{
+				sphero.connect(true);
+			}
+			catch (RobotInitializeConnectionFailed e)
+			{
+				setController(null);
+				logger.warning(e.getMessage());
+				return false;
+			}
 		}
 		
 		timer.scheduleAtFixedRate(getTimerTask(), 0, SpheroApp.UPDATE_PERIOD);
+		return true;
 	}
 	
 	public Robot getRobot()

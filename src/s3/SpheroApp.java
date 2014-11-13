@@ -76,8 +76,11 @@ public class SpheroApp
 							if (!s.hasController())
 							{
 								s.setController(c);
-								s.startUpdating(updateTimer);
-								break;
+								if (s.startUpdating(updateTimer))
+								{
+									cMap.put(c, new Option<Sphero>(s));
+									break;
+								}
 							}
 						}
 					}

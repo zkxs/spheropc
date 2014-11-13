@@ -104,7 +104,7 @@ public class ControllerManager implements ControllerListener
 								{
 									// then unbound controller c has pressed start
 									controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
-									logger.info(c.getName() + " @ " + c.getPortNumber() + " is now bound");
+									logger.info(c.getName() + " @ " + c.hashCode() + " is now bound");
 								}
 							}
 						}
@@ -249,7 +249,7 @@ public class ControllerManager implements ControllerListener
 	@Override
 	public void controllerAdded(ControllerEvent ev)
 	{
-		logger.info("Controller Added: " + ev.getController().getName() + " @ " + ev.getController().getPortNumber());
+		logger.info("Controller Added: " + ev.getController().getName() + " @ " + ev.getController().hashCode());
 		
 		currentControllers.add(ev.getController());
 		
@@ -262,7 +262,7 @@ public class ControllerManager implements ControllerListener
 	@Override
 	public void controllerRemoved(ControllerEvent ev)
 	{
-		logger.info("Controller Removed: " + ev.getController().getName() + " @ " + ev.getController().getPortNumber());
+		logger.info("Controller Removed: " + ev.getController().getName() + " @ " + ev.getController().hashCode());
 		
 		currentControllers.remove(ev.getController());
 		
