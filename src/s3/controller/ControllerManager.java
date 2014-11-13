@@ -4,19 +4,26 @@ package s3.controller;
 import java.lang.reflect.Constructor;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import s3.sphero.Sphero;
+import s3.util.Option;
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.ControllerEvent;
 import net.java.games.input.ControllerListener;
+import net.java.games.input.Event;
+import net.java.games.input.EventQueue;
 
 public class ControllerManager implements ControllerListener
 {	
@@ -31,7 +38,15 @@ public class ControllerManager implements ControllerListener
 	
 	private SortedSet<Controller> currentControllers;
 	
-	private Set<ControllerListener> listeners = new TreeSet<ControllerListener>();
+	private LinkedList<ControllerListener> listeners;
+	
+	/** Putting nulls into this would be confusing, so I used Option, similar to how Scala does it */
+	private TreeMap<Controller, Option<Sphero>> controllerMap;
+	
+	/** Temporary event object to reuse in EventeQueues */
+	private Event event;
+	
+	private Logger logger;
 	
 	/**
 	 * Get an instance of ControllerManager
@@ -55,23 +70,49 @@ public class ControllerManager implements ControllerListener
 		oldControllers = new TreeSet<Controller>(ctrlComparator);
 		newControllers = new TreeSet<Controller>(ctrlComparator);
 		currentControllers = new ConcurrentSkipListSet<Controller>(ctrlComparator);
+		listeners = new LinkedList<ControllerListener>();
+		controllerMap = new TreeMap<Controller, Option<Sphero>>(ctrlComparator);
+		event = new Event();
+		logger = Logger.getLogger(this.getClass().getName());
 	}
 	
 	private void init()
 	{
+		// see if unbound controllers have pressed start
 		timer.scheduleAtFixedRate(new TimerTask(){
-
 			@Override
 			public void run()
 			{
-				
-				
+				for (Controller c : currentControllers)
+				{
+					if (!controllerMap.containsKey(c))
+					{	// if unbound controller
+						// see if start has been pressed
+						if (c.poll())
+						{
+							EventQueue queue = c.getEventQueue();
+							while (queue.getNextEvent(event))
+							{
+								if (event.getComponent().getIdentifier().equals(Identifier.Button._7)
+										&& event.getValue() == 1.0f)
+								{
+									// then unbound controller c has pressed start
+									controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
+								}
+							}
+						}
+						else
+						{
+							// something is very wrong
+							logger.log(Level.WARNING, "existing controller failed to poll");
+						}
+					}
+				}
 			}
-			
-		}, 0, 50); // 50ms delay
+		}, 0, 100); // 100ms delay
 		
+		// keep track of added and removed controllers
 		timer.scheduleAtFixedRate(new TimerTask(){
-
 			@Override
 			public void run()
 			{
@@ -130,22 +171,22 @@ public class ControllerManager implements ControllerListener
 	}
 	
 	final private static Component.Identifier[] xboxComponents = {
-		Identifier.Axis.Y,
-		Identifier.Axis.X,
-		Identifier.Axis.RY,
-		Identifier.Axis.RX,
-		Identifier.Axis.Z,
-		Identifier.Button._0,
-		Identifier.Button._1,
-		Identifier.Button._2,
-		Identifier.Button._3,
-		Identifier.Button._4,
-		Identifier.Button._5,
-		Identifier.Button._6,
-		Identifier.Button._7,
-		Identifier.Button._8,
-		Identifier.Button._9,
-		Identifier.Axis.POV
+		Identifier.Axis.Y, // Left Y
+		Identifier.Axis.X, // Left X
+		Identifier.Axis.RY, // Right Y
+		Identifier.Axis.RX, // Right X
+		Identifier.Axis.Z, // analog triggers
+		Identifier.Button._0, // A
+		Identifier.Button._1, // B
+		Identifier.Button._2, // X
+		Identifier.Button._3, // Y
+		Identifier.Button._4, // L1 (bumper)
+		Identifier.Button._5, // R1 (bumper)
+		Identifier.Button._6, // back
+		Identifier.Button._7, // start
+		Identifier.Button._8, // L3 (stick push)
+		Identifier.Button._9, // R3 (stick push)
+		Identifier.Axis.POV // D-Pad
 	};
 	private static boolean isValidController(Controller c)
 	{
