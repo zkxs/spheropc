@@ -276,7 +276,8 @@ public class ControllerManager implements ControllerListener
 		@Override
 		public int compare(Controller o1, Controller o2)
 		{
-			return o1.getPortNumber() - o2.getPortNumber();
+			// apparently the controllers have NOTHING unique about them
+			return o1.hashCode() - o2.hashCode();
 		}
 	};
 }
