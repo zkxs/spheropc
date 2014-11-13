@@ -41,7 +41,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 				bt.discover();
 			}
 			
-		}, 0, 10000); // 100 ms rescan delay
+		}, 0, 10000); // 10s rescan delay
 	}
 
 	@Override

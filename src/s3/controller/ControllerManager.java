@@ -9,6 +9,7 @@ import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
@@ -26,7 +27,9 @@ public class ControllerManager implements ControllerListener
 	 * These sets are modified in a timer thread, so don't ever iterate over them elsewhere
 	 * without synchronization
 	 */
-	private SortedSet<Controller> currentControllers, newControllers;
+	private SortedSet<Controller> oldControllers, newControllers;
+	
+	private SortedSet<Controller> currentControllers;
 	
 	private Set<ControllerListener> listeners = new TreeSet<ControllerListener>();
 	
@@ -49,12 +52,24 @@ public class ControllerManager implements ControllerListener
 	
 	private ControllerManager()
 	{
-		currentControllers = new TreeSet<Controller>(ctrlComparator);
+		oldControllers = new TreeSet<Controller>(ctrlComparator);
 		newControllers = new TreeSet<Controller>(ctrlComparator);
+		currentControllers = new ConcurrentSkipListSet<Controller>(ctrlComparator);
 	}
 	
 	private void init()
 	{
+		timer.scheduleAtFixedRate(new TimerTask(){
+
+			@Override
+			public void run()
+			{
+				
+				
+			}
+			
+		}, 0, 50); // 50ms delay
+		
 		timer.scheduleAtFixedRate(new TimerTask(){
 
 			@Override
@@ -71,10 +86,10 @@ public class ControllerManager implements ControllerListener
 					}
 				}
 				
-				synchronized (currentControllers)
+				// this block would need to be synchronized if oldControllers were accessed elsewhere
 				{
 					// check if controllers have gone missing
-					Iterator<Controller> iter = currentControllers.iterator();
+					Iterator<Controller> iter = oldControllers.iterator();
 					while (iter.hasNext())
 					{
 						final Controller c = iter.next();
@@ -88,7 +103,7 @@ public class ControllerManager implements ControllerListener
 					// check if controllers have been added
 					for (Controller c : newControllers)
 					{
-						if (currentControllers.add(c))
+						if (oldControllers.add(c))
 						{
 							controllerAdded(new ControllerEvent(c));
 						}
@@ -96,15 +111,12 @@ public class ControllerManager implements ControllerListener
 				}
 			}
 			
-		}, 0, 100); // 100 ms rescan delay
+		}, 0, 100); // 100ms rescan delay
 	}
 	
 	public SortedSet<Controller> getControllers()
 	{
-		synchronized (currentControllers)
-		{
-			return new TreeSet<Controller>(currentControllers);
-		}
+		return currentControllers;
 	}
 	
 	public boolean addListener(ControllerListener cl)
@@ -181,6 +193,8 @@ public class ControllerManager implements ControllerListener
 		//TODO: Remove print
 		System.out.printf("Added: %s\n", ev.getController().getName());
 		
+		currentControllers.add(ev.getController());
+		
 		for (ControllerListener cl : listeners)
 		{
 			cl.controllerAdded(ev);
@@ -192,6 +206,8 @@ public class ControllerManager implements ControllerListener
 	{
 		//TODO: remove print
 		System.out.printf("Removed: %s\n", ev.getController().getName());
+		
+		currentControllers.remove(ev.getController());
 		
 		for (ControllerListener cl : listeners)
 		{
