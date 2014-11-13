@@ -19,7 +19,7 @@ import net.java.games.input.ControllerListener;
 
 public class ControllerManager implements ControllerListener
 {	
-	private static Timer timer = new Timer();
+	private static Timer timer = new Timer(true);
 	private static ControllerManager instance = null;
 	
 	/**

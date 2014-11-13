@@ -10,7 +10,7 @@ import se.nicklasgavelin.sphero.Robot;
 
 public class SpheroManager implements BluetoothDiscoveryListener
 {	
-	private static Timer timer = new Timer();
+	private static Timer timer = new Timer(true);
 	private static SpheroManager instance = null;
 	
 	private Bluetooth bt;
