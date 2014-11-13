@@ -1,6 +1,8 @@
 package s3;
 
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import s3.controller.ControllerManager;
 import s3.sphero.SpheroManager;
@@ -19,6 +21,8 @@ public class SpheroApp
 	
 	private SpheroApp()
 	{
+		Logger.getLogger("net.java.games.input.ControllerEnvironment").setLevel(Level.WARNING);
+		
 		cManager = ControllerManager.getControllerManager();
 		sManager = SpheroManager.getSpheroManager();
 	}
