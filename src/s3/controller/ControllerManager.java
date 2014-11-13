@@ -14,16 +14,16 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import s3.sphero.Sphero;
-import s3.util.Option;
 import net.java.games.input.Component;
+import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
-import net.java.games.input.Component.Identifier;
 import net.java.games.input.ControllerEvent;
 import net.java.games.input.ControllerListener;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+import s3.util.Option;
+import se.nicklasgavelin.sphero.Robot;
 
 public class ControllerManager implements ControllerListener
 {	
@@ -41,7 +41,7 @@ public class ControllerManager implements ControllerListener
 	private LinkedList<ControllerListener> listeners;
 	
 	/** Putting nulls into this would be confusing, so I used Option, similar to how Scala does it */
-	private TreeMap<Controller, Option<Sphero>> controllerMap;
+	private TreeMap<Controller, Option<Robot>> controllerMap;
 	
 	/** Temporary event object to reuse in EventeQueues */
 	private Event event;
@@ -71,7 +71,7 @@ public class ControllerManager implements ControllerListener
 		newControllers = new TreeSet<Controller>(ctrlComparator);
 		currentControllers = new ConcurrentSkipListSet<Controller>(ctrlComparator);
 		listeners = new LinkedList<ControllerListener>();
-		controllerMap = new TreeMap<Controller, Option<Sphero>>(ctrlComparator);
+		controllerMap = new TreeMap<Controller, Option<Robot>>(ctrlComparator);
 		event = new Event();
 		logger = Logger.getLogger(this.getClass().getName());
 	}
@@ -97,7 +97,7 @@ public class ControllerManager implements ControllerListener
 										&& event.getValue() == 1.0f)
 								{
 									// then unbound controller c has pressed start
-									controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
+									controllerMap.put(c, (Option<Robot>) Option.EMPTY);
 								}
 							}
 						}
