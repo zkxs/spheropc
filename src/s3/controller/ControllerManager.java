@@ -2,11 +2,10 @@ package s3.controller;
 
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
@@ -23,7 +22,13 @@ public class ControllerManager implements ControllerListener
 	private static Timer timer = new Timer();
 	private static ControllerManager instance = null;
 	
-	private Set<Controller> controllers;
+	/**
+	 * These sets are modified in a timer thread, so don't ever iterate over them elsewhere
+	 * without synchronization
+	 */
+	private SortedSet<Controller> currentControllers, newControllers;
+	
+	private Set<ControllerListener> listeners = new TreeSet<ControllerListener>();
 	
 	/**
 	 * Get an instance of ControllerManager
@@ -34,6 +39,7 @@ public class ControllerManager implements ControllerListener
 		if (instance == null)
 		{
 			instance = new ControllerManager();
+			instance.init();
 			
 			//environment.addControllerListener(instance); // doesn't even work
 		}
@@ -43,47 +49,72 @@ public class ControllerManager implements ControllerListener
 	
 	private ControllerManager()
 	{
-		controllers = new TreeSet<Controller>(ctrlComparator);
-		
+		currentControllers = new TreeSet<Controller>(ctrlComparator);
+		newControllers = new TreeSet<Controller>(ctrlComparator);
+	}
+	
+	private void init()
+	{
 		timer.scheduleAtFixedRate(new TimerTask(){
 
 			@Override
 			public void run()
 			{
 				final Controller[] poll = getEnvironment().getControllers();
-				final Set<Controller> current = new TreeSet<Controller>(ctrlComparator);
+				newControllers.clear();
 				
 				for (Controller c : poll)
 				{
 					if (isValidController(c))
 					{
-						current.add(c);
+						newControllers.add(c);
 					}
 				}
 				
-				// check if controllers have gone missing
-				Iterator<Controller> iter = controllers.iterator();
-				while (iter.hasNext())
+				synchronized (currentControllers)
 				{
-					final Controller c = iter.next();
-					if (!current.contains(c))
+					// check if controllers have gone missing
+					Iterator<Controller> iter = currentControllers.iterator();
+					while (iter.hasNext())
 					{
-						controllerRemoved(new ControllerEvent(c));
-						iter.remove();
+						final Controller c = iter.next();
+						if (!newControllers.contains(c))
+						{
+							controllerRemoved(new ControllerEvent(c));
+							iter.remove();
+						}
 					}
-				}
-				
-				// check if controllers have been added
-				for (Controller c : current)
-				{
-					if (controllers.add(c))
+					
+					// check if controllers have been added
+					for (Controller c : newControllers)
 					{
-						controllerAdded(new ControllerEvent(c));
+						if (currentControllers.add(c))
+						{
+							controllerAdded(new ControllerEvent(c));
+						}
 					}
 				}
 			}
 			
-		}, 0, 100);
+		}, 0, 100); // 100 ms rescan delay
+	}
+	
+	public SortedSet<Controller> getControllers()
+	{
+		synchronized (currentControllers)
+		{
+			return new TreeSet<Controller>(currentControllers);
+		}
+	}
+	
+	public boolean addListener(ControllerListener cl)
+	{
+		return listeners.add(cl);
+	}
+	
+	public boolean removeListener(ControllerListener cl)
+	{
+		return listeners.remove(cl);
 	}
 	
 	final private static Component.Identifier[] xboxComponents = {
@@ -147,15 +178,25 @@ public class ControllerManager implements ControllerListener
 	@Override
 	public void controllerAdded(ControllerEvent ev)
 	{
-		// TODO Auto-generated method stub
+		//TODO: Remove print
 		System.out.printf("Added: %s\n", ev.getController().getName());
+		
+		for (ControllerListener cl : listeners)
+		{
+			cl.controllerAdded(ev);
+		}
 	}
 
 	@Override
 	public void controllerRemoved(ControllerEvent ev)
 	{
-		// TODO Auto-generated method stub
+		//TODO: remove print
 		System.out.printf("Removed: %s\n", ev.getController().getName());
+		
+		for (ControllerListener cl : listeners)
+		{
+			cl.controllerRemoved(ev);
+		}
 	}
 	
 	final static private Comparator<Controller> ctrlComparator = new Comparator<Controller>() {
