@@ -11,7 +11,7 @@ import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.Component.Identifier;
 
-public class Sphero
+public class Sphero implements Comparable<Sphero>
 {	
 	private static final Logger logger = Logger.getLogger(Sphero.class.getName());
 	private Robot sphero;
@@ -290,5 +290,29 @@ public class Sphero
 			//out.print('W');
 			return -Math.cos(angle);
 		}
+	}
+
+	@Override
+	public int compareTo(Sphero that)
+	{
+		// return (this - that);
+		
+		return this.getRobot().getId().compareTo(that.getRobot().getId());
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return getRobot().getId().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Sphero other = (Sphero) obj;
+		return this.getRobot().getId().equals(other.getRobot().getId());
 	}
 }
