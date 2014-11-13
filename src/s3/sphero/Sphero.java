@@ -254,7 +254,7 @@ public class Sphero
 	 * @param angle the angle in radians between -PI and PI
 	 * @return the inverse of the max magnitude
 	 */
-	double inverseAngleMax(double angle)
+	private static double inverseAngleMax(double angle)
 	{
 		if ((-3 * Math.PI / 4) < angle && angle <= (-Math.PI / 4))
 		{
