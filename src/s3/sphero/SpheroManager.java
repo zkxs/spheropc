@@ -1,5 +1,6 @@
 package s3.sphero;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -8,6 +9,8 @@ import java.util.logging.Logger;
 import se.nicklasgavelin.bluetooth.*;
 import se.nicklasgavelin.bluetooth.Bluetooth.EVENT;
 import se.nicklasgavelin.sphero.Robot;
+import se.nicklasgavelin.sphero.exception.InvalidRobotAddressException;
+import se.nicklasgavelin.sphero.exception.RobotBluetoothException;
 
 public class SpheroManager implements BluetoothDiscoveryListener
 {	
@@ -17,6 +20,8 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	private Bluetooth bt;
 	public Logger logger;
 	private volatile boolean searchInProgress = false;
+	private ArrayList<Sphero> spheros;
+	
 	
 	public static SpheroManager getSpheroManager()
 	{		
@@ -29,10 +34,20 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		return instance;
 	}
 	
+	/**
+	 * Get the array of Spheros. Don't modify it
+	 * @return the array of Spheros
+	 */
+	public ArrayList<Sphero> getSpheros()
+	{
+		return spheros;
+	}
+	
 	private SpheroManager()
 	{
 		logger = Logger.getLogger(this.getClass().getName());
 		bt = new Bluetooth(this, Bluetooth.SERIAL_COM);
+		spheros = new ArrayList<Sphero>();
 	}
 	
 	private void init()
@@ -56,8 +71,25 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	@Override
 	public void deviceDiscovered(BluetoothDevice d)
 	{
-		// TODO Auto-generated method stub
-		System.out.printf("%s %5b \"%s\"\n", d.getAddress(), Robot.isValidDevice(d), d.getName());
+		logger.info(
+			String.format("addr: %s, sphero: %5b, name: \"%s\"",
+				d.getAddress(), Robot.isValidDevice(d), d.getName()));
+		
+		if (Robot.isValidDevice(d))
+		{
+			try
+			{
+				Sphero s = new Sphero(new Robot(d));
+				if (!spheros.contains(s))
+				{
+					spheros.add(s);
+				}
+			}
+			catch (InvalidRobotAddressException | RobotBluetoothException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 		
 	}
 	
@@ -86,6 +118,16 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	{
 		timer.cancel();
 		bt.cancelDiscovery();
+		
+		for (Sphero s : spheros)
+		{
+			Robot r = s.getRobot();
+			if (r.isConnected())
+			{
+				r.disconnect();
+			}
+		}
+		
 	}
 	
 }

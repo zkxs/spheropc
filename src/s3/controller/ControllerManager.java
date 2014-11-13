@@ -104,6 +104,7 @@ public class ControllerManager implements ControllerListener
 								{
 									// then unbound controller c has pressed start
 									controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
+									logger.info(c.getName() + " @ " + c.getPortNumber() + " is now bound");
 								}
 							}
 						}
@@ -161,7 +162,17 @@ public class ControllerManager implements ControllerListener
 		}, 0, 100); // 100ms rescan delay
 	}
 	
-	public SortedSet<Controller> getControllers()
+	public void close()
+	{
+		timer.cancel();
+	}
+	
+	public TreeMap<Controller, Option<Sphero>> getControllerMap()
+	{
+		return controllerMap;
+	}
+	
+	public SortedSet<Controller> getConnectedControllers()
 	{
 		return currentControllers;
 	}
@@ -219,26 +230,26 @@ public class ControllerManager implements ControllerListener
 	
 	private ControllerEnvironment getEnvironment()
 	{
-		try
-		{
-			@SuppressWarnings("unchecked")
-			Class<ControllerEnvironment> clazz = (Class<ControllerEnvironment>) Class.forName("net.java.games.input.DefaultControllerEnvironment");
-			Constructor<ControllerEnvironment> con = clazz.getDeclaredConstructor();
-			con.setAccessible(true);
-			return con.newInstance();
-		}
-		catch (Exception e) // Reflection has way too many things that can go wrong
-		{
-			// Checked exceptions are a bad idea anyways
-			throw new RuntimeException(e);
-		}		
+		return ControllerEnvironment.getDefaultEnvironment();
+//		try
+//		{
+//			@SuppressWarnings("unchecked")
+//			Class<ControllerEnvironment> clazz = (Class<ControllerEnvironment>) Class.forName("net.java.games.input.DefaultControllerEnvironment");
+//			Constructor<ControllerEnvironment> con = clazz.getDeclaredConstructor();
+//			con.setAccessible(true);
+//			return con.newInstance();
+//		}
+//		catch (Exception e) // Reflection has way too many things that can go wrong
+//		{
+//			// Checked exceptions are a bad idea anyways
+//			throw new RuntimeException(e);
+//		}		
 	}
 
 	@Override
 	public void controllerAdded(ControllerEvent ev)
 	{
-		//TODO: Remove print
-		System.out.printf("Added: %s\n", ev.getController().getName());
+		logger.info("Controller Added: " + ev.getController().getName() + " @ " + ev.getController().getPortNumber());
 		
 		currentControllers.add(ev.getController());
 		
@@ -251,8 +262,7 @@ public class ControllerManager implements ControllerListener
 	@Override
 	public void controllerRemoved(ControllerEvent ev)
 	{
-		//TODO: remove print
-		System.out.printf("Removed: %s\n", ev.getController().getName());
+		logger.info("Controller Removed: " + ev.getController().getName() + " @ " + ev.getController().getPortNumber());
 		
 		currentControllers.remove(ev.getController());
 		

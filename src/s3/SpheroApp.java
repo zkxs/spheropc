@@ -1,25 +1,43 @@
 package s3;
 
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.java.games.input.Controller;
 import s3.controller.ControllerManager;
+import s3.sphero.Sphero;
 import s3.sphero.SpheroManager;
+import s3.util.Option;
 
 
 public class SpheroApp
 {	
+	public final static long UPDATE_PERIOD = 75;
+	
+	
 	public static void main(String[] args)
 	{
+		System.out.println("Program Started.");
+		System.out.println("Press enter to stop. Stopping may take a few seconds.");
+		System.out.println();
 		SpheroApp app = new SpheroApp();
 		app.init();
 	}
 	
 	ControllerManager cManager;
 	SpheroManager sManager;
+	Timer updateTimer;
+	
+	/** This will be replaced with a gui later */
+	Timer temporaryConnectorTimer;
 	
 	private SpheroApp()
 	{
@@ -31,20 +49,74 @@ public class SpheroApp
 		
 		cManager = ControllerManager.getControllerManager();
 		sManager = SpheroManager.getSpheroManager();
+		
+		updateTimer = new Timer(true);
+		temporaryConnectorTimer = new Timer(true);
 	}
 	
 	private void init()
 	{
+		temporaryConnectorTimer.scheduleAtFixedRate(new TimerTask(){
+
+			@Override
+			public void run()
+			{
+				final TreeMap<Controller, Option<Sphero>> cMap = cManager.getControllerMap();
+				final Set<Controller> controllers = cMap.keySet();
+				final ArrayList<Sphero> spheros = sManager.getSpheros();
+				
+				for (Controller c : controllers)
+				{
+					Option<Sphero> option = cMap.get(c);
+					if (option.isNull())
+					{
+						// we should assign a controller
+						for (Sphero s : spheros)
+						{
+							if (!s.hasController())
+							{
+								s.setController(c);
+								s.startUpdating(updateTimer);
+								break;
+							}
+						}
+					}
+				}
+			}
+			
+		}, 0, 100);
+		
+		
 		Scanner console = new Scanner(System.in);
 		console.nextLine();
 		console.close();
+		
+		updateTimer.cancel();
+		temporaryConnectorTimer.cancel();
 		
 		
 		//TODO: make a thread to enforce shutdown after a timeout
 		
 		System.out.println("Closing sphero manager");
 		sManager.close();
+		cManager.close();
+		
 		System.out.println("Ending main method");
+		System.out.println();
+		System.out.println("Active threads: ");
+		Thread killer1 = new Thread(killerRunnable1, "killer1");
+		killer1.setDaemon(true);
+		killer1.start();
+		Thread killer2 = new Thread(killerRunnable2, "killer2");
+		killer2.setDaemon(true);
+		killer2.start();
+		Thread[] activeThreads = new Thread[Thread.activeCount()];
+		Thread.enumerate(activeThreads);
+		for (Thread thread : activeThreads)
+		{
+			System.out.printf("\t%-40s Daemon: %b\n", thread.getName(), thread.isDaemon());
+		}
+		System.out.println();
 	}
 	
 	private void setLogHandlerLevel(Level level)
@@ -72,4 +144,53 @@ public class SpheroApp
 	    //set the console handler to fine:
 	    consoleHandler.setLevel(level);
 	}
+	
+	private Runnable killerRunnable1 = new Runnable(){
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				Thread.sleep(5000);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
+			
+			System.err.print("Killed");
+			System.exit(1);
+		}
+		
+	};
+	
+	private Runnable killerRunnable2 = new Runnable(){
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				Thread.sleep(6000);
+				System.err.print(".");
+				Thread.sleep(1000);
+				System.err.print(".");
+				Thread.sleep(1000);
+				System.err.print(".");
+				Thread.sleep(2000);
+				System.err.print(" Apparently not.");
+				
+				Thread.sleep(5000);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
+			
+			System.err.println("\nLets try again, but a little harder this time.");
+			Runtime.getRuntime().halt(2);
+		}
+		
+	};
 }

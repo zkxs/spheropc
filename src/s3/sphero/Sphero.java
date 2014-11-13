@@ -1,9 +1,12 @@
 package s3.sphero;
 
 import java.awt.Color;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import s3.SpheroApp;
 import se.nicklasgavelin.sphero.Robot;
 import se.nicklasgavelin.sphero.command.CalibrateCommand;
 import se.nicklasgavelin.sphero.command.RollCommand;
@@ -15,10 +18,45 @@ public class Sphero implements Comparable<Sphero>
 {	
 	private static final Logger logger = Logger.getLogger(Sphero.class.getName());
 	private Robot sphero;
+	private Controller controller;
+	private Timer timer;
 	
 	public Sphero(Robot sphero)
 	{
 		this.sphero = sphero;
+	}
+	
+	/**
+	 * Set the controller. Set to <code>null</code> to clear the hasController state
+	 * @param controller the controller
+	 */
+	public void setController(Controller controller)
+	{
+		logger.info(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.getPortNumber());
+		this.controller = controller;
+	}
+	
+	public boolean hasController()
+	{
+		return controller != null;
+	}
+	
+	public TimerTask getTimerTask()
+	{
+		return timerTask;
+	}
+	
+	public void startUpdating(Timer timer)
+	{
+		this.timer = timer;
+		
+		Robot sphero = getRobot();
+		if (!sphero.isConnected())
+		{
+			sphero.connect(true);
+		}
+		
+		timer.scheduleAtFixedRate(getTimerTask(), 0, SpheroApp.UPDATE_PERIOD);
 	}
 	
 	public Robot getRobot()
@@ -315,4 +353,13 @@ public class Sphero implements Comparable<Sphero>
 		Sphero other = (Sphero) obj;
 		return this.getRobot().getId().equals(other.getRobot().getId());
 	}
+	
+	private TimerTask timerTask = new TimerTask(){
+
+		@Override
+		public void run()
+		{
+			update(controller);
+		}	
+	};
 }
