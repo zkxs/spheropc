@@ -73,11 +73,12 @@ public class SpheroApp
 						// we should assign a controller
 						for (Sphero s : spheros)
 						{
-							if (!s.hasController())
+							if (!s.hasController() && !s.getRobot().isConnected())
 							{
 								s.setController(c);
 								if (s.startUpdating(updateTimer))
 								{
+									assert c != null;
 									cMap.put(c, new Option<Sphero>(s));
 									break;
 								}

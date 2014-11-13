@@ -23,6 +23,7 @@ public class Sphero implements Comparable<Sphero>
 	private Robot sphero;
 	private Controller controller;
 	private Timer timer;
+	private boolean dead = false;
 	
 	public Sphero(SpheroApp spheroApp, Robot sphero)
 	{
@@ -49,6 +50,16 @@ public class Sphero implements Comparable<Sphero>
 		return timerTask;
 	}
 	
+	public void setDead(boolean dead)
+	{
+		this.dead = dead;
+	}
+	
+	private boolean isDead()
+	{
+		return dead;
+	}
+	
 	/**
 	 * 
 	 * @param timer
@@ -68,6 +79,7 @@ public class Sphero implements Comparable<Sphero>
 			catch (RobotInitializeConnectionFailed e)
 			{
 				setController(null);
+				setDead(true);
 				logger.warning(e.getMessage());
 				return false;
 			}
@@ -143,11 +155,11 @@ public class Sphero implements Comparable<Sphero>
 	 */
 	public void update(Controller controller)
 	{
-		if (!controller.poll())
+		if (controller == null || !controller.poll())
 		{
-			spheroApp.getControllerManager().disconnect(controller);
 			setController(null);
 			sphero.disconnect();
+			getTimerTask().cancel();
 			return;
 		}
 		
@@ -162,6 +174,8 @@ public class Sphero implements Comparable<Sphero>
 			{
 				spheroApp.getControllerManager().unbind(controller);
 				setController(null);
+				setDead(true);
+				getTimerTask().cancel();
 				logger.warning(e.getMessage());
 				return;
 			}

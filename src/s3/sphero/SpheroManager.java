@@ -84,9 +84,15 @@ public class SpheroManager implements BluetoothDiscoveryListener
 			try
 			{
 				Sphero s = new Sphero(spheroApp, new Robot(d));
-				if (!spheros.contains(s))
+				
+				int idx = spheros.indexOf(s);
+				if (idx != -1)
 				{
 					spheros.add(s);
+				}
+				else
+				{
+					spheros.get(idx).setDead(false);
 				}
 			}
 			catch (InvalidRobotAddressException | RobotBluetoothException e)

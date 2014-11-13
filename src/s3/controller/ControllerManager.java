@@ -89,6 +89,7 @@ public class ControllerManager implements ControllerListener
 	@SuppressWarnings("unchecked")
 	public void unbind(Controller c)
 	{
+		assert c != null;
 		controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
 		logger.info(c.getName() + " @ " + c.hashCode() + " is now bound to null");
 	}
@@ -96,7 +97,11 @@ public class ControllerManager implements ControllerListener
 	public void disconnect(Controller c)
 	{
 		controllerMap.remove(c);
-		logger.info(c.getName() + " @ " + c.hashCode() + " is now unbound");
+		
+		if (c != null)
+			logger.info(c.getName() + " @ " + c.hashCode() + " is now unbound");
+		else
+			logger.warning("Some null controller was still in the map");
 	}
 	
 	private void init()
