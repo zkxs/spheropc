@@ -18,12 +18,15 @@ import net.java.games.input.Component.Identifier;
 public class Sphero implements Comparable<Sphero>
 {	
 	private static final Logger logger = Logger.getLogger(Sphero.class.getName());
+	
+	private SpheroApp spheroApp;
 	private Robot sphero;
 	private Controller controller;
 	private Timer timer;
 	
-	public Sphero(Robot sphero)
+	public Sphero(SpheroApp spheroApp, Robot sphero)
 	{
+		this.spheroApp = spheroApp;
 		this.sphero = sphero;
 	}
 	
@@ -33,10 +36,6 @@ public class Sphero implements Comparable<Sphero>
 	 */
 	public void setController(Controller controller)
 	{
-		if (controller != null)
-		{
-			logger.info(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.hashCode());
-		}
 		this.controller = controller;
 	}
 	
@@ -74,6 +73,7 @@ public class Sphero implements Comparable<Sphero>
 			}
 		}
 		
+		logger.info(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.hashCode());
 		timer.scheduleAtFixedRate(getTimerTask(), 0, SpheroApp.UPDATE_PERIOD);
 		return true;
 	}
@@ -145,14 +145,26 @@ public class Sphero implements Comparable<Sphero>
 	{
 		if (!controller.poll())
 		{
-			// TODO: do something
+			spheroApp.getControllerManager().disconnect(controller);
+			setController(null);
+			sphero.disconnect();
 			return;
 		}
 		
 		if (!sphero.isConnected())
 		{
-			// TODO: do something
-			return;
+			try
+			{
+				// try to connect
+				sphero.connect(true);
+			}
+			catch (RobotInitializeConnectionFailed e)
+			{
+				spheroApp.getControllerManager().unbind(controller);
+				setController(null);
+				logger.warning(e.getMessage());
+				return;
+			}
 		}
 		
 		xAxis1 = controller.getComponent(Identifier.Axis.X);

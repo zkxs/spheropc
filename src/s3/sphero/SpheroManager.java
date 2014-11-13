@@ -6,6 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
+import s3.SpheroApp;
 import se.nicklasgavelin.bluetooth.*;
 import se.nicklasgavelin.bluetooth.Bluetooth.EVENT;
 import se.nicklasgavelin.sphero.Robot;
@@ -17,17 +18,19 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	private static Timer timer = new Timer(true);
 	private static SpheroManager instance = null;
 	
+	private SpheroApp spheroApp;
+	
 	private Bluetooth bt;
 	public Logger logger;
 	private volatile boolean searchInProgress = false;
 	private ArrayList<Sphero> spheros;
 	
 	
-	public static SpheroManager getSpheroManager()
+	public static SpheroManager getSpheroManager(SpheroApp spheroApp)
 	{		
 		if (instance == null)
 		{
-			instance = new SpheroManager();
+			instance = new SpheroManager(spheroApp);
 			instance.init();
 		}
 		
@@ -43,8 +46,9 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		return spheros;
 	}
 	
-	private SpheroManager()
+	private SpheroManager(SpheroApp spheroApp)
 	{
+		this.spheroApp = spheroApp;
 		logger = Logger.getLogger(this.getClass().getName());
 		bt = new Bluetooth(this, Bluetooth.SERIAL_COM);
 		spheros = new ArrayList<Sphero>();
@@ -79,7 +83,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		{
 			try
 			{
-				Sphero s = new Sphero(new Robot(d));
+				Sphero s = new Sphero(spheroApp, new Robot(d));
 				if (!spheros.contains(s))
 				{
 					spheros.add(s);

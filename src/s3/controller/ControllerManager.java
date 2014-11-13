@@ -28,6 +28,7 @@ import net.java.games.input.ControllerEvent;
 import net.java.games.input.ControllerListener;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+import s3.SpheroApp;
 import s3.sphero.Sphero;
 import s3.util.Option;
 
@@ -35,6 +36,8 @@ public class ControllerManager implements ControllerListener
 {	
 	private static Timer timer = new Timer(true);
 	private static ControllerManager instance = null;
+	
+	private SpheroApp spheroApp;
 	
 	/**
 	 * These sets are modified in a timer thread, so don't ever iterate over them elsewhere
@@ -58,11 +61,11 @@ public class ControllerManager implements ControllerListener
 	 * Get an instance of ControllerManager
 	 * @return an instance of ControllerManager
 	 */
-	public static synchronized ControllerManager getControllerManager()
+	public static synchronized ControllerManager getControllerManager(SpheroApp spheroApp)
 	{
 		if (instance == null)
 		{
-			instance = new ControllerManager();
+			instance = new ControllerManager(spheroApp);
 			instance.init();
 			
 			//environment.addControllerListener(instance); // doesn't even work
@@ -71,8 +74,9 @@ public class ControllerManager implements ControllerListener
 		return instance;
 	}
 	
-	private ControllerManager()
+	private ControllerManager(SpheroApp spheroApp)
 	{
+		this.spheroApp = spheroApp;
 		oldControllers = new TreeSet<Controller>(ctrlComparator);
 		newControllers = new TreeSet<Controller>(ctrlComparator);
 		currentControllers = new ConcurrentSkipListSet<Controller>(ctrlComparator);
@@ -80,6 +84,19 @@ public class ControllerManager implements ControllerListener
 		controllerMap = new TreeMap<Controller, Option<Sphero>>(ctrlComparator);
 		event = new Event();
 		logger = Logger.getLogger(this.getClass().getName());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void unbind(Controller c)
+	{
+		controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
+		logger.info(c.getName() + " @ " + c.hashCode() + " is now bound to null");
+	}
+	
+	public void disconnect(Controller c)
+	{
+		controllerMap.remove(c);
+		logger.info(c.getName() + " @ " + c.hashCode() + " is now unbound");
 	}
 	
 	private void init()
@@ -103,8 +120,7 @@ public class ControllerManager implements ControllerListener
 										&& event.getValue() == 1.0f)
 								{
 									// then unbound controller c has pressed start
-									controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
-									logger.info(c.getName() + " @ " + c.hashCode() + " is now bound");
+									unbind(c);
 								}
 							}
 						}

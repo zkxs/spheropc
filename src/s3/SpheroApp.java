@@ -32,9 +32,9 @@ public class SpheroApp
 		app.init();
 	}
 	
-	ControllerManager cManager;
-	SpheroManager sManager;
-	Timer updateTimer;
+	private ControllerManager cManager;
+	private SpheroManager sManager;
+	private Timer updateTimer;
 	
 	/** This will be replaced with a gui later */
 	Timer temporaryConnectorTimer;
@@ -47,8 +47,8 @@ public class SpheroApp
 //		Logger.getLogger("net.java.games.input.ControllerEnvironment").setLevel(Level.WARNING);
 //		Logger.getLogger("s3.sphero.SpheroManager").setLevel(Level.WARNING);
 		
-		cManager = ControllerManager.getControllerManager();
-		sManager = SpheroManager.getSpheroManager();
+		cManager = ControllerManager.getControllerManager(this);
+		sManager = SpheroManager.getSpheroManager(this);
 		
 		updateTimer = new Timer(true);
 		temporaryConnectorTimer = new Timer(true);
@@ -90,6 +90,8 @@ public class SpheroApp
 		}, 0, 100);
 		
 		
+		
+		
 		Scanner console = new Scanner(System.in);
 		console.nextLine();
 		console.close();
@@ -120,6 +122,16 @@ public class SpheroApp
 			System.out.printf("\t%-40s Daemon: %b\n", thread.getName(), thread.isDaemon());
 		}
 		System.out.println();
+	}
+	
+	public ControllerManager getControllerManager()
+	{
+		return cManager;
+	}
+	
+	public SpheroManager getSpheroManager()
+	{
+		return sManager;
 	}
 	
 	private void setLogHandlerLevel(Level level)
