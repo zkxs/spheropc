@@ -1,4 +1,4 @@
-package gui;
+package s3.gui;
 
 import java.awt.*;
 
