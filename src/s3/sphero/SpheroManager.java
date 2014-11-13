@@ -3,6 +3,7 @@ package s3.sphero;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 
 import se.nicklasgavelin.bluetooth.*;
 import se.nicklasgavelin.bluetooth.Bluetooth.EVENT;
@@ -14,9 +15,11 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	private static SpheroManager instance = null;
 	
 	private Bluetooth bt;
+	public Logger logger;
+	private volatile boolean searchInProgress = false;
 	
 	public static SpheroManager getSpheroManager()
-	{
+	{		
 		if (instance == null)
 		{
 			instance = new SpheroManager();
@@ -28,52 +31,56 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	
 	private SpheroManager()
 	{
+		logger = Logger.getLogger(this.getClass().getName());
 		bt = new Bluetooth(this, Bluetooth.SERIAL_COM);
 	}
 	
 	private void init()
 	{
+		//TODO: should this be done constantly?
 		timer.scheduleAtFixedRate(new TimerTask(){
 
 			@Override
 			public void run()
 			{
-				bt.discover();
+				// doing multiple searches at once is bad
+				if (!searchInProgress)
+				{
+					bt.discover();
+				}
 			}
 			
-		}, 0, 10000); // 10s rescan delay
+		}, 1000, 30000); // 30s rescan delay
+	}
+	
+	@Override
+	public void deviceDiscovered(BluetoothDevice d)
+	{
+		// TODO Auto-generated method stub
+		System.out.printf("%s %5b \"%s\"\n", d.getAddress(), Robot.isValidDevice(d), d.getName());
+		
+	}
+	
+	@Override
+	public void deviceSearchStarted()
+	{
+		searchInProgress = true;
+		logger.info("Discover starting...");
 	}
 
 	@Override
 	public void deviceSearchCompleted(Collection<BluetoothDevice> devices)
 	{
-		// TODO Auto-generated method stub
-		for (BluetoothDevice d : devices)
-		{
-			System.out.printf("%s %5b \"%s\"\n", d.getAddress(), Robot.isValidDevice(d), d.getName());
-		}
-	}
-
-	@Override
-	public void deviceDiscovered(BluetoothDevice device)
-	{
-		// TODO Auto-generated method stub
-		
+		searchInProgress = false;
+		logger.info("Discover finished");
 	}
 
 	@Override
 	public void deviceSearchFailed(EVENT error)
 	{
-		System.err.printf("Discover Error: %s\n", error.getErrorMessage());
-		
+		logger.warning("Discover Error: "+ error.getErrorMessage());
 	}
 
-	@Override
-	public void deviceSearchStarted()
-	{
-		// TODO Auto-generated method stub
-		System.out.println("Discover starting...");
-	}
 	
 	public void close()
 	{

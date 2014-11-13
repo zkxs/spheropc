@@ -1,5 +1,11 @@
 package s3.controller;
 
+/* TODO: 
+ * When a controller is unplugged:
+ *     remove it from the map
+ *     disconnect the sphero
+ */
+
 
 import java.lang.reflect.Constructor;
 import java.util.Comparator;

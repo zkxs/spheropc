@@ -21,6 +21,11 @@ public class Sphero
 		this.sphero = sphero;
 	}
 	
+	public Robot getRobot()
+	{
+		return sphero;
+	}
+	
 	// drive
 	private static float DRIVE_MAX = 0.5f; // limit the max speed (unless boosting)
 	private static float DRIVE_TURNZONE = 0.45f; // only turns if input less than this magnitude
@@ -75,6 +80,10 @@ public class Sphero
 	private boolean moving = false;
 	private boolean aligned = false;
 	
+	/**
+	 * Control the Sphero. This is called periodically from a timer
+	 * @param controller The controller to use for input
+	 */
 	public void update(Controller controller)
 	{
 		if (!controller.poll())
