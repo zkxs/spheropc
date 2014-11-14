@@ -1,11 +1,11 @@
 package s3;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -61,7 +61,7 @@ public class SpheroApp
 			@Override
 			public void run()
 			{
-				final TreeMap<Controller, Option<Sphero>> cMap = cManager.getControllerMap();
+				final Map<Controller, Option<Sphero>> cMap = cManager.getControllerMap();
 				final Set<Controller> controllers = cMap.keySet();
 				final ArrayList<Sphero> spheros = sManager.getSpheros();
 				

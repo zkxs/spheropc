@@ -55,7 +55,7 @@ public class Sphero implements Comparable<Sphero>
 		this.dead = dead;
 	}
 	
-	private boolean isDead()
+	public boolean isDead()
 	{
 		return dead;
 	}

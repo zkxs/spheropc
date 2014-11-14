@@ -2,11 +2,15 @@ package s3.sphero;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
+import net.java.games.input.Controller;
 import s3.SpheroApp;
+import s3.util.Option;
 import se.nicklasgavelin.bluetooth.*;
 import se.nicklasgavelin.bluetooth.Bluetooth.EVENT;
 import se.nicklasgavelin.sphero.Robot;
@@ -76,7 +80,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	public void deviceDiscovered(BluetoothDevice d)
 	{
 		logger.info(
-			String.format("addr: %s, sphero: %5b, name: \"%s\"",
+			String.format("Bluetooth device: {addr: %s, sphero: %5b, name: \"%s\"}",
 				d.getAddress(), Robot.isValidDevice(d), d.getName()));
 		
 		if (Robot.isValidDevice(d))
@@ -86,11 +90,11 @@ public class SpheroManager implements BluetoothDiscoveryListener
 				Sphero s = new Sphero(spheroApp, new Robot(d));
 				
 				int idx = spheros.indexOf(s);
-				if (idx != -1)
+				if (idx == -1) // if not contained already
 				{
-					spheros.add(s);
+					spheros.add(s); // add it
 				}
-				else
+				else // else mark it as alive
 				{
 					spheros.get(idx).setDead(false);
 				}
@@ -115,6 +119,43 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	{
 		searchInProgress = false;
 		logger.info("Discover finished");
+		
+		StringBuilder sb1 = new StringBuilder();
+		sb1.append("Live spheros: ");
+		StringBuilder sb3 = new StringBuilder();
+		sb3.append("Dead spheros: ");
+		for (Sphero s : spheros)
+		{
+			if (!s.isDead())
+			{
+				sb1.append(s.getRobot().getName());
+				sb1.append(", ");
+			}
+			else
+			{
+				sb3.append(s.getRobot().getName());
+				sb3.append(", ");
+			}
+		}
+		logger.info(sb1.toString());
+		logger.info(sb3.toString());
+		
+		final Map<Controller, Option<Sphero>> cMap = spheroApp.getControllerManager().getControllerMap();
+		final Set<Controller> controllers = cMap.keySet();
+		
+		StringBuilder sb2 = new StringBuilder();
+		sb2.append("Searching controllers: ");
+		
+		for (Controller c : controllers)
+		{
+			Option<Sphero> option = cMap.get(c);
+			if (option.isNull())
+			{
+				sb2.append(c.getName() + "@" + c.hashCode());
+				sb2.append(", ");
+			}
+		}
+		logger.info(sb2.toString());
 	}
 
 	@Override

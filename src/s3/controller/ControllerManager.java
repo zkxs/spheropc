@@ -7,15 +7,15 @@ package s3.controller;
  */
 
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.*;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +50,7 @@ public class ControllerManager implements ControllerListener
 	private LinkedList<ControllerListener> listeners;
 	
 	/** Putting nulls into this would be confusing, so I used Option, similar to how Scala does it */
-	private TreeMap<Controller, Option<Sphero>> controllerMap;
+	private ConcurrentHashMap<Controller, Option<Sphero>> controllerMap;
 	
 	/** Temporary event object to reuse in EventeQueues */
 	private Event event;
@@ -81,7 +81,7 @@ public class ControllerManager implements ControllerListener
 		newControllers = new TreeSet<Controller>(ctrlComparator);
 		currentControllers = new ConcurrentSkipListSet<Controller>(ctrlComparator);
 		listeners = new LinkedList<ControllerListener>();
-		controllerMap = new TreeMap<Controller, Option<Sphero>>(ctrlComparator);
+		controllerMap = new ConcurrentHashMap<Controller, Option<Sphero>>();
 		event = new Event();
 		logger = Logger.getLogger(this.getClass().getName());
 	}
@@ -188,7 +188,7 @@ public class ControllerManager implements ControllerListener
 		timer.cancel();
 	}
 	
-	public TreeMap<Controller, Option<Sphero>> getControllerMap()
+	public ConcurrentHashMap<Controller, Option<Sphero>> getControllerMap()
 	{
 		return controllerMap;
 	}
