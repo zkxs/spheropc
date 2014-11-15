@@ -82,7 +82,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		if ( Robot.isValidDevice(d) )
 		{
 			System.out.println(
-				String.format("Bluetooth device: {addr: %s, name: \"%s\"}",
+				String.format("Bluetooth device: {addr: %s, sphero: %5b, name: \"%s\"}",
 					d.getAddress(), Robot.isValidDevice(d), d.getName()));
 		}
 		

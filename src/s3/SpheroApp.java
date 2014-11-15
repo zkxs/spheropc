@@ -95,6 +95,9 @@ public class SpheroApp
 		
 		Scanner console = new Scanner(System.in);
 		console.nextLine();
+		
+		// now we begin closing all of the things
+		
 		console.close();
 		
 		updateTimer.cancel();

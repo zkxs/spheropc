@@ -195,7 +195,7 @@ public class Sphero implements Comparable<Sphero>
 		triggerAxis = controller.getComponent(Identifier.Axis.Z);
 		
 		disconnectComboPrevious = disconnectCombo;
-		disconnectCombo = buttonBack.getPollData() == ONE && buttonStart.getPollData() == ONE;
+		disconnectCombo = buttonBack.getPollData() == ONE;
 		boost = axis1Press.getPollData() == ONE;
 		heading = Math.atan2(-xAxis1.getPollData(), yAxis1.getPollData());
 		stickLeftMagnitude  = (float)(Math.hypot(xAxis1.getPollData(), yAxis1.getPollData()));
