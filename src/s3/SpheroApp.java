@@ -110,20 +110,13 @@ public class SpheroApp
 		
 		System.out.println("Ending main method");
 		System.out.println();
-		System.out.println("Active threads: ");
+		
 		Thread killer1 = new Thread(killerRunnable1, "killer1");
 		killer1.setDaemon(true);
 		killer1.start();
 		Thread killer2 = new Thread(killerRunnable2, "killer2");
 		killer2.setDaemon(true);
 		killer2.start();
-		Thread[] activeThreads = new Thread[Thread.activeCount()];
-		Thread.enumerate(activeThreads);
-		for (Thread thread : activeThreads)
-		{
-			System.out.printf("\t%-40s Daemon: %b\n", thread.getName(), thread.isDaemon());
-		}
-		System.out.println();
 	}
 	
 	public ControllerManager getControllerManager()
@@ -169,7 +162,17 @@ public class SpheroApp
 		{
 			try
 			{
-				Thread.sleep(5000);
+				Thread.sleep(500);
+				System.out.println("Active threads: ");
+				Thread[] activeThreads = new Thread[Thread.activeCount()];
+				Thread.enumerate(activeThreads);
+				for (Thread thread : activeThreads)
+				{
+					System.out.printf("\t%-40s Daemon: %b\n", thread.getName(), thread.isDaemon());
+				}
+				System.out.println();
+				
+				Thread.sleep(4500);
 			}
 			catch (InterruptedException e)
 			{

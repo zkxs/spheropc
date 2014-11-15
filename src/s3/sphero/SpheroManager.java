@@ -14,6 +14,7 @@ import s3.util.Option;
 import se.nicklasgavelin.bluetooth.*;
 import se.nicklasgavelin.bluetooth.Bluetooth.EVENT;
 import se.nicklasgavelin.sphero.Robot;
+import se.nicklasgavelin.sphero.command.CommandMessage;
 import se.nicklasgavelin.sphero.exception.InvalidRobotAddressException;
 import se.nicklasgavelin.sphero.exception.RobotBluetoothException;
 
@@ -160,9 +161,11 @@ public class SpheroManager implements BluetoothDiscoveryListener
 			}
 			else
 			{
-				if (option.get().getRobot().isConnected())
+				Robot r = option.get().getRobot();
+				if (r.isConnected())
 				{
 					counter++;
+					//r.sendCommand(new CommandMessage(CommandMessage.COMMAND_MESSAGE_TYPE.GET_CONFIGURATION_BLOCK));
 				}
 			}
 		}
