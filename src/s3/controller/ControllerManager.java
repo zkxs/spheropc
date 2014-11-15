@@ -1,12 +1,5 @@
 package s3.controller;
 
-/* TODO: 
- * When a controller is unplugged:
- *     remove it from the map
- *     disconnect the sphero
- */
-
-
 import java.lang.reflect.*;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -91,7 +84,7 @@ public class ControllerManager implements ControllerListener
 	{
 		assert c != null;
 		controllerMap.put(c, (Option<Sphero>) Option.EMPTY);
-		logger.info(c.getName() + " @ " + c.hashCode() + " is now bound to null");
+		System.out.println(c.getName() + " @ " + c.hashCode() + " is now bound to null");
 	}
 	
 	public void disconnect(Controller c)
@@ -99,9 +92,9 @@ public class ControllerManager implements ControllerListener
 		controllerMap.remove(c);
 		
 		if (c != null)
-			logger.info(c.getName() + " @ " + c.hashCode() + " is now unbound");
+			System.out.println(c.getName() + " @ " + c.hashCode() + " is now unbound");
 		else
-			logger.warning("Some null controller was still in the map");
+			System.err.println("Some null controller was still in the map");
 	}
 	
 	private void init()
@@ -132,7 +125,7 @@ public class ControllerManager implements ControllerListener
 						else
 						{
 							// something is very wrong
-							logger.log(Level.WARNING, "existing controller failed to poll");
+							System.err.println("existing controller failed to poll");
 						}
 					}
 				}
@@ -270,7 +263,7 @@ public class ControllerManager implements ControllerListener
 	@Override
 	public void controllerAdded(ControllerEvent ev)
 	{
-		logger.info("Controller Added: " + ev.getController().getName() + " @ " + ev.getController().hashCode());
+		System.out.println("Controller Added: " + ev.getController().getName() + " @ " + ev.getController().hashCode());
 		
 		currentControllers.add(ev.getController());
 		
@@ -283,7 +276,7 @@ public class ControllerManager implements ControllerListener
 	@Override
 	public void controllerRemoved(ControllerEvent ev)
 	{
-		logger.info("Controller Removed: " + ev.getController().getName() + " @ " + ev.getController().hashCode());
+		System.out.println("Controller Removed: " + ev.getController().getName() + " @ " + ev.getController().hashCode());
 		
 		currentControllers.remove(ev.getController());
 		

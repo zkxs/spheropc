@@ -85,7 +85,7 @@ public class Sphero implements Comparable<Sphero>
 			}
 		}
 		
-		logger.info(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.hashCode());
+		System.out.println(getRobot().getName() + " is now controlled by " + controller.getName() + " @ " + controller.hashCode());
 		timer.scheduleAtFixedRate(getTimerTask(), 0, SpheroApp.UPDATE_PERIOD);
 		return true;
 	}
@@ -119,6 +119,8 @@ public class Sphero implements Comparable<Sphero>
 	private static float CALIBRATION_MOTOR_MAX = 359f;
 	
 	// components
+	private Component buttonBack;
+	private Component buttonStart;
 	private Component xAxis1;
 	private Component yAxis1;
 	private Component xAxis2 ;
@@ -128,6 +130,9 @@ public class Sphero implements Comparable<Sphero>
 	private Component triggerAxis;
 	
 	// state
+	private boolean disconnectCombo = false;
+	private boolean disconnectComboPrevious = false;
+	private long disconnectComboBegan = 0;
 	private boolean backLED = true;
 	private long lastCalibrated = -1;
 	private double heading; // ranges from -PI to PI
@@ -157,9 +162,7 @@ public class Sphero implements Comparable<Sphero>
 	{
 		if (controller == null || !controller.poll())
 		{
-			setController(null);
-			sphero.disconnect();
-			getTimerTask().cancel();
+			disconnect();
 			return;
 		}
 		
@@ -181,6 +184,8 @@ public class Sphero implements Comparable<Sphero>
 			}
 		}
 		
+		buttonBack = controller.getComponent(Identifier.Button._6);
+		buttonStart = controller.getComponent(Identifier.Button._7);
 		xAxis1 = controller.getComponent(Identifier.Axis.X);
 		yAxis1 = controller.getComponent(Identifier.Axis.Y);
 		xAxis2 = controller.getComponent(Identifier.Axis.RX);
@@ -189,7 +194,8 @@ public class Sphero implements Comparable<Sphero>
 		axis2Press = controller.getComponent(Identifier.Button._9);
 		triggerAxis = controller.getComponent(Identifier.Axis.Z);
 		
-
+		disconnectComboPrevious = disconnectCombo;
+		disconnectCombo = buttonBack.getPollData() == ONE && buttonStart.getPollData() == ONE;
 		boost = axis1Press.getPollData() == ONE;
 		heading = Math.atan2(-xAxis1.getPollData(), yAxis1.getPollData());
 		stickLeftMagnitude  = (float)(Math.hypot(xAxis1.getPollData(), yAxis1.getPollData()));
@@ -206,6 +212,19 @@ public class Sphero implements Comparable<Sphero>
 				boost,
 				(calibration - CALIBRATION_DEADZONE) / CALIBRATION_LIVEZONE);*/
 		
+		if (disconnectCombo)
+		{
+			if (!disconnectComboPrevious) // if press just started
+			{
+				disconnectComboBegan = System.currentTimeMillis();
+			}
+			
+			if (System.currentTimeMillis() - disconnectComboBegan > 2000) // if two seconds
+			{
+				disconnect();
+				return;
+			}
+		}
 		
 		if (lastCalibrated == -1) lastCalibrated = System.currentTimeMillis();
 		
@@ -339,6 +358,14 @@ public class Sphero implements Comparable<Sphero>
 		
 		
 		loopNumber++;
+	}
+	
+	private void disconnect()
+	{
+		spheroApp.getControllerManager().disconnect(controller);
+		setController(null);
+		sphero.disconnect();
+		getTimerTask().cancel();
 	}
 		
 	/**

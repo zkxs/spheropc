@@ -9,7 +9,7 @@ import javax.swing.border.LineBorder;
 public class MainWindow extends JFrame
 {
 	/** Class version number */
-	//private static final long serialVersionUID = 0_0L; //TODO: Begin keeping track of this before release
+	private static final long serialVersionUID = 1_0L;
 	
 	public static void main(String[] args)
 	{

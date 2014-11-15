@@ -79,7 +79,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	@Override
 	public void deviceDiscovered(BluetoothDevice d)
 	{
-		logger.info(
+		System.out.println(
 			String.format("Bluetooth device: {addr: %s, sphero: %5b, name: \"%s\"}",
 				d.getAddress(), Robot.isValidDevice(d), d.getName()));
 		
@@ -111,14 +111,14 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	public void deviceSearchStarted()
 	{
 		searchInProgress = true;
-		logger.info("Discover starting...");
+		System.out.println("Discover starting...");
 	}
 
 	@Override
 	public void deviceSearchCompleted(Collection<BluetoothDevice> devices)
 	{
 		searchInProgress = false;
-		logger.info("Discover finished");
+		System.out.println("Discover finished");
 		
 		StringBuilder sb1 = new StringBuilder();
 		sb1.append("Live spheros: ");
@@ -137,8 +137,8 @@ public class SpheroManager implements BluetoothDiscoveryListener
 				sb3.append(", ");
 			}
 		}
-		logger.info(sb1.toString());
-		logger.info(sb3.toString());
+		System.out.println(sb1.toString());
+		System.out.println(sb3.toString());
 		
 		final Map<Controller, Option<Sphero>> cMap = spheroApp.getControllerManager().getControllerMap();
 		final Set<Controller> controllers = cMap.keySet();
@@ -155,7 +155,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 				sb2.append(", ");
 			}
 		}
-		logger.info(sb2.toString());
+		System.out.println(sb2.toString());
 	}
 
 	@Override

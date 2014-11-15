@@ -41,7 +41,7 @@ public class SpheroApp
 	
 	private SpheroApp()
 	{
-		setLogHandlerLevel(Level.ALL);
+		setLogHandlerLevel(Level.OFF);
 		
 		// I don't know why I can't set the log level like this
 //		Logger.getLogger("net.java.games.input.ControllerEnvironment").setLevel(Level.WARNING);
@@ -100,8 +100,6 @@ public class SpheroApp
 		updateTimer.cancel();
 		temporaryConnectorTimer.cancel();
 		
-		
-		//TODO: make a thread to enforce shutdown after a timeout
 		
 		System.out.println("Closing sphero manager");
 		sManager.close();
