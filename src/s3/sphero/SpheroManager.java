@@ -79,9 +79,12 @@ public class SpheroManager implements BluetoothDiscoveryListener
 	@Override
 	public void deviceDiscovered(BluetoothDevice d)
 	{
-		System.out.println(
-			String.format("Bluetooth device: {addr: %s, sphero: %5b, name: \"%s\"}",
-				d.getAddress(), Robot.isValidDevice(d), d.getName()));
+		if ( Robot.isValidDevice(d) )
+		{
+			System.out.println(
+				String.format("Bluetooth device: {addr: %s, name: \"%s\"}",
+					d.getAddress(), Robot.isValidDevice(d), d.getName()));
+		}
 		
 		if (Robot.isValidDevice(d))
 		{
@@ -165,6 +168,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		}
 		System.out.println("Bound controllers: " + counter);
 		System.out.println(sb2.toString());
+		System.out.println(); // blank line
 	}
 
 	@Override
