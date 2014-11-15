@@ -120,6 +120,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		searchInProgress = false;
 		System.out.println("Discover finished");
 		
+		int counter = 0;
 		StringBuilder sb1 = new StringBuilder();
 		sb1.append("Live spheros: ");
 		StringBuilder sb3 = new StringBuilder();
@@ -154,7 +155,15 @@ public class SpheroManager implements BluetoothDiscoveryListener
 				sb2.append(c.getName() + "@" + c.hashCode());
 				sb2.append(", ");
 			}
+			else
+			{
+				if (option.get().getRobot().isConnected())
+				{
+					counter++;
+				}
+			}
 		}
+		System.out.println("Bound controllers: " + counter);
 		System.out.println(sb2.toString());
 	}
 

@@ -344,7 +344,8 @@ public class Robot
 		// Check if we could connect to the bluetooth device
 		if( this.btc == null )
 		{
-			Logging.error( "Failed to connect to the robot bluetooth connection" );
+			//MICHAEL WAS HERE
+			//Logging.error( "Failed to connect to the robot bluetooth connection" );
 			throw new RobotInitializeConnectionFailed( "Failed to connect due to bluetooth error" );
 		}
 
