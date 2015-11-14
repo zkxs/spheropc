@@ -144,16 +144,16 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		final Map<Controller, Option<Sphero>> cMap = spheroApp.getControllerManager().getControllerMap();
 		final Set<Controller> controllers = cMap.keySet();
 		
-		StringBuilder sb2 = new StringBuilder();
-		sb2.append("Searching controllers: ");
+		StringBuilder sbSearchingControllers = new StringBuilder();
+		sbSearchingControllers.append("Searching controllers: ");
 		
 		for (Controller c : controllers)
 		{
 			Option<Sphero> option = cMap.get(c);
 			if (option.isNull())
 			{
-				sb2.append(c.getName() + "@" + c.hashCode());
-				sb2.append(", ");
+				sbSearchingControllers.append(c.getName() + "@" + c.hashCode());
+				sbSearchingControllers.append(", ");
 			}
 			else
 			{
@@ -166,7 +166,7 @@ public class SpheroManager implements BluetoothDiscoveryListener
 			}
 		}
 		System.out.println("Bound controllers: " + counter);
-		System.out.println(sb2.toString());
+		System.out.println(sbSearchingControllers.toString());
 		System.out.println(); // blank line
 	}
 
