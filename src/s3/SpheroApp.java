@@ -34,7 +34,6 @@ public class SpheroApp
 	
 	private ControllerManager cManager;
 	private SpheroManager sManager;
-	private Timer updateTimer;
 	
 	/** This will be replaced with a gui later */
 	Timer temporaryConnectorTimer;
@@ -49,8 +48,6 @@ public class SpheroApp
 		
 		cManager = ControllerManager.getControllerManager(this);
 		sManager = SpheroManager.getSpheroManager(this);
-		
-		updateTimer = new Timer(true);
 		temporaryConnectorTimer = new Timer(true);
 	}
 	
@@ -76,7 +73,7 @@ public class SpheroApp
 							if (!s.hasController() && !s.getRobot().isConnected())
 							{
 								s.setController(c);
-								if (s.startUpdating(updateTimer))
+								if (s.startUpdating())
 								{
 									assert c != null;
 									cMap.put(c, new Option<Sphero>(s));
@@ -100,7 +97,6 @@ public class SpheroApp
 		
 		console.close();
 		
-		updateTimer.cancel();
 		temporaryConnectorTimer.cancel();
 		
 		

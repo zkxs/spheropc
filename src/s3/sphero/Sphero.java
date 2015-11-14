@@ -53,6 +53,10 @@ public class Sphero implements Comparable<Sphero>
 	public void setDead(boolean dead)
 	{
 		this.dead = dead;
+		
+		if (dead) {
+			timer.cancel();
+		}
 	}
 	
 	public boolean isDead()
@@ -65,9 +69,9 @@ public class Sphero implements Comparable<Sphero>
 	 * @param timer
 	 * @return True if successful
 	 */
-	public boolean startUpdating(Timer timer)
+	public boolean startUpdating()
 	{
-		this.timer = timer;
+		this.timer = new Timer(true);
 		
 		Robot sphero = getRobot();
 		if (!sphero.isConnected())
