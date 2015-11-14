@@ -125,25 +125,25 @@ public class SpheroManager implements BluetoothDiscoveryListener
 		System.out.println("Discover finished");
 		
 		int counter = 0;
-		StringBuilder sb1 = new StringBuilder();
-		sb1.append("Live spheros: ");
-		StringBuilder sb3 = new StringBuilder();
-		sb3.append("Dead spheros: ");
+		StringBuilder sbLiveSpheros = new StringBuilder();
+		sbLiveSpheros.append("Live spheros: ");
+		StringBuilder sbDeadSpheros = new StringBuilder();
+		sbDeadSpheros.append("Dead spheros: ");
 		for (Sphero s : spheros)
 		{
 			if (!s.isDead())
 			{
-				sb1.append(s.getRobot().getName());
-				sb1.append(", ");
+				sbLiveSpheros.append(s.getRobot().getName());
+				sbLiveSpheros.append(", ");
 			}
 			else
 			{
-				sb3.append(s.getRobot().getName());
-				sb3.append(", ");
+				sbDeadSpheros.append(s.getRobot().getName());
+				sbDeadSpheros.append(", ");
 			}
 		}
-		System.out.println(sb1.toString());
-		System.out.println(sb3.toString());
+		System.out.println(sbLiveSpheros.toString());
+		System.out.println(sbDeadSpheros.toString());
 		
 		final Map<Controller, Option<Sphero>> cMap = spheroApp.getControllerManager().getControllerMap();
 		final Set<Controller> controllers = cMap.keySet();
