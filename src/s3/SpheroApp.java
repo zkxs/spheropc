@@ -41,7 +41,7 @@ public class SpheroApp
 	
 	private SpheroApp()
 	{
-		setLogHandlerLevel(Level.OFF);
+		setLogHandlerLevel(Level.WARNING);
 		
 		// I don't know why I can't set the log level like this
 //		Logger.getLogger("net.java.games.input.ControllerEnvironment").setLevel(Level.WARNING);
